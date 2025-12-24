@@ -134,7 +134,7 @@ export async function getproductbyId(req,res){
         
         const productId = req.params.productId
         const product = await Product.findOne({productId:productId})
-        
+
         if(product == null){
             res.status(404).json({message:"Product not found"})
             return
@@ -149,4 +149,9 @@ export async function getproductbyId(req,res){
     }catch(error){
         res.status(500).json({message:"error fetching product",error:error.message})
     }
+}
+
+
+export async function searchProduct(req,res){
+  
 }
