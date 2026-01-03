@@ -154,4 +154,6 @@ export async function getproductbyId(req,res){
 
 export async function searchProduct(req,res){
   
+
+    
 }
