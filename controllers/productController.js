@@ -39,7 +39,7 @@ data.price=req.body.price;
 data.labelledPrice=req.body.labelledPrice || req.body.price
 data.category=req.body.category || "others"
 data.altNames=req.body.altNames|| []
-data.images=req.body.images|| ["/images/default-product-1.png","/images/default-product-2.png"]
+data.imageUrls = req.body.imageUrls || []
 data.isVisible=req.body.isVisible
 data.brand=req.body.brand || "Generic"
 data.model=req.body.model || "standard"
@@ -114,7 +114,7 @@ data.price=req.body.price;
 data.labelledPrice=req.body.labelledPrice || req.body.price
 data.category=req.body.category || "others"
 data.altNames=req.body.altNames|| []
-data.images=req.body.images|| ["/images/default-product-1.png","/images/default-product-2.png"]
+data.imageUrls = req.body.imageUrls || []
 data.isVisible=req.body.isVisible
 data.brand=req.body.brand || "Generic"
 data.model=req.body.model || "standard"
@@ -127,6 +127,8 @@ res.json({message:"Product updated successfully"})
         res.status(400).json({message:"error updating product",error:error.message})
     }
 }
+
+
 
 
 export async function getproductbyId(req,res){

@@ -19,6 +19,7 @@ productRouter.get("/trending",(req,res)=>{
 
 
 
+
 productRouter.delete("/:productId",deleteProduct)
 productRouter.put("/:productId",updateProduct)
 productRouter.get("/:productId",getproductbyId)
