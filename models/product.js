@@ -46,8 +46,11 @@ const productSchema = new mongoose.Schema({
     model:{
         type:String,
         default:"standard"
+    },
+    quantity:{
+        type:Number,
+        default:100
     }
-    
 
 })
 
