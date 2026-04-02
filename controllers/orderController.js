@@ -89,9 +89,9 @@ export async function createOrder(req, res) {
                 return
             }
 
-            // if(product.qty < item.qty){
+            // if(product.quantity < item.quantity){
 
-            //     res.status(404).json({ message : "Only " + product.qty + " items available for product with id " + item.productId + ". Please adjust the quantity in your cart and try again." })
+            //     res.status(404).json({ message : "Only " + product.quantity + " items available for product with id " + item.productId + ". Please adjust the quantity in your cart and try again." })
             //     return
             // }
 
@@ -100,22 +100,21 @@ export async function createOrder(req, res) {
                 name : product.name,
                 price : product.price,
                 labelledPrice : product.labelledPrice,
-                image : product.imageUrls.length > 0 ? product.imageUrls[0] : "https://via.placeholder.com/150",
+                image : product.imageUrls[0],
                 quantity : item.quantity
             })
 
-            
             orderData.total += product.price * item.quantity
         }
         
         const order = new Order(orderData);
         await order.save();
 
-        //reduce the qty from the products collection
+        //reduce the quantity from the products collection
         // for(let i = 0; i< orderData.items.length; i++){
 
         //     const item = orderData.items[i]
-        //     await Product.updateOne({ productId : item.productId }, { $inc : { qty : -item.quantity } })
+        //     await Product.updateOne({ productId : item.productId }, { $inc : { quantity : -item.quantity } })
         // }
 
         res.status(201).json({ message: "Order created successfully", orderId : orderData.orderId });
@@ -127,49 +126,74 @@ export async function createOrder(req, res) {
 	//
 }
 
-export async function getorders(req,res){
+export async function getOrders(req,res){
+
     if (req.user == null) {
         res.status(401).json({ message: "Unauthorized. Please log in to view your orders." });
         return;
     }
 
-
     const pageSizeInString = req.params.pageSize || "10"
+
     const pageNumberInString = req.params.pageNumber || "1"
 
     const pageSize = parseInt(pageSizeInString)
+
     const pageNumber = parseInt(pageNumberInString)
 
-    const skip = (pageNumber - 1) * pageSize
-try{
+    try{
+
+        if(isAdmin(req)){
+
+            const numberOfOrders = await Order.countDocuments()
+
+            const numberOfPages = Math.ceil(numberOfOrders / pageSize)
+
+            const orders = await Order.find().sort({ date : -1 }).skip((pageNumber - 1) * pageSize).limit(pageSize)
+
+            res.json({
+                orders : orders,
+                totalPages : numberOfPages
+            })
+        }else{
+            const numberOfOrders = await Order.countDocuments()
+
+            const numberOfPages = Math.ceil(numberOfOrders / pageSize)
+
+            const orders = await Order.find({email : req.user.email}).sort({ date : -1 }).skip((pageNumber - 1) * pageSize).limit(pageSize)
+
+            res.json({
+                orders : orders,
+                totalPages : numberOfPages
+            })
+        }
+
+}   catch(error){
+        console.log("Error fetching orders", error)
+        res.status(500).json({ message : "Error fetching orders", error : error })
+    }
+
+}
+
+export async function updateOrderStatusAndNotes(req,res){
 
     if(isAdmin(req)){
 
-        const numberOfOrders = await Order.countDocuments()
-        const numberOfPages = Math.ceil(numberOfOrders / pageSize)
-        const orders = await Order.find().sort({ date : -1 }).skip((pageNumber-1)*pageSize).limit(pageSize)
+        const orderId = req.params.orderId
+        try{
 
-       res.json({
-            orders : orders,
-            totalPages : numberOfPages,
-        })
-      
+            await Order.updateOne({ orderId : orderId }, { status : req.body.status, notes : req.body.notes })
 
+            res.json({ message : "Order status and notes updated successfully" })
 
+        }catch(error){
+            console.log("Error updating order status and notes", error)
+            res.status(500).json({ message : "Error updating order status and notes", error : error })
+            return
+        }       
 
-    }else{
-
-        const numberOfOrders = await Order.countDocuments({ email : req.user.email })
-        const numberOfPages = Math.ceil(numberOfOrders / pageSize)
-        const orders = await Order.find({ email : req.user.email }).sort({ date : -1 }).skip((pageNumber-1)*pageSize).limit(pageSize)
-
-       res.json({
-            orders : orders,
-            totalPages : numberOfPages,
-       })
     }
-}catch(error){
-    console.log("Error fetching orders", error);
-    res.status(500).json({ message: "Error fetching orders", error: error });
-}
+    else{
+        res.status(403).json({ message : "Forbidden. Only admins can update order status and notes." })
+    }
 }
