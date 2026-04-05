@@ -6,6 +6,8 @@ import authorizeUser from './lib/jwtMiddleware.js'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import orderRouter from './router/orderRouter.js'
+import statsRouter from './router/statsRouter.js'
+import contactRouter from './router/contactRouter.js'
 
 dotenv.config()
 
@@ -27,5 +29,8 @@ app.use(express.json())
 app.use("/api/users",userRouter)
 app.use("/api/products",productRouter)
 app.use("/api/orders",orderRouter)
+app.use("/api/stats", statsRouter);
+app.use("/api/contact", contactRouter);
+
 
 app.listen(5000,()=>{console.log("server is running on port 5000")})
